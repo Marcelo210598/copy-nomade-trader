@@ -43,13 +43,19 @@
 ## ⚠️ Fora do código (memória do Claude)
 - Ao salvar a memória de projeto no fim desta sessão, sobrescrevi por engano outra memória já existente com o mesmo nome (era sobre a landing page antiga do Matheus em `Copytrade/landing`, projeto separado). Corrigido: renomeei o slug pra `project_copy_nomade_trader_plataforma` e reconstituí a memória antiga com o que achei no git — mas parte do conteúdo original dela pode ter se perdido.
 
+- **Edição de trade com log de correção:**
+  - `/admin/trades/[id]`: detalhe do trade (resultado atual + histórico de correções)
+  - `/admin/trades/[id]/editar`: formulário pré-preenchido, motivo obrigatório, modal de confirmação mostrando o novo resultado antes de salvar
+  - `TradeEdicao` grava snapshot antes/depois + motivo + campos alterados, na mesma transação do update — nunca sobrescreve silenciosamente
+  - Saldo dos investidores é sempre derivado on-the-fly dos trades publicados (não persistido) → a correção já reflete automaticamente assim que a área do investidor existir, sem precisar de um passo extra de "recálculo"
+  - Testado de ponta a ponta: criei um trade, editei o preço de saída, conferi o histórico com antes/depois batendo, apaguei os dados de teste depois
+
 ## 🚧 TODO conhecido (não bloqueante agora)
 - Upload de print removido do formulário por pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
 
 ## 📋 Próximos passos
-1. Edição de trade publicado com log de correção (recalculando saldo dos investidores afetados)
-2. Trocar dados mock da página pública por queries reais do Prisma
-3. Área do investidor (onboarding, magic link via Resend, saldo composto vs linear)
+1. Trocar dados mock da página pública por queries reais do Prisma
+2. Área do investidor (onboarding, magic link via Resend, saldo composto vs linear)
 
 ## 🔧 Configurações importantes
 - `DATABASE_URL` (Neon) — ainda não configurada, usando placeholder
