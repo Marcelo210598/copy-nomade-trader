@@ -184,17 +184,6 @@ export function TradeForm({
           />
         </div>
 
-        <div>
-          <Label htmlFor="print">Print (opcional, só anexo visual)</Label>
-          <input
-            id="print"
-            name="print"
-            type="file"
-            accept="image/*"
-            className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-elevated file:px-3 file:py-2 file:text-sm file:text-foreground"
-          />
-        </div>
-
         <label className="flex items-center gap-2 text-sm text-muted">
           <input
             type="checkbox"

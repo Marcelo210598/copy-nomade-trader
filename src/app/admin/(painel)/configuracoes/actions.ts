@@ -53,3 +53,39 @@ export async function salvarConfigGeral(formData: FormData) {
   revalidatePath("/admin/configuracoes");
   revalidatePath("/admin/trades/novo");
 }
+
+const thresholdsSchema = z.object({
+  winRateMinimoVerde: z.coerce.number().min(0).max(100),
+  winRateMinimoAmarelo: z.coerce.number().min(0).max(100),
+  expectanciaMinimaVerde: z.coerce.number(),
+  expectanciaMinimaAmarela: z.coerce.number(),
+  drawdownMaximoVerde: z.coerce.number().min(0),
+  drawdownMaximoAmarelo: z.coerce.number().min(0),
+});
+
+export async function salvarThresholdsSaude(formData: FormData) {
+  const dados = thresholdsSchema.parse({
+    winRateMinimoVerde: formData.get("winRateMinimoVerde"),
+    winRateMinimoAmarelo: formData.get("winRateMinimoAmarelo"),
+    expectanciaMinimaVerde: formData.get("expectanciaMinimaVerde"),
+    expectanciaMinimaAmarela: formData.get("expectanciaMinimaAmarela"),
+    drawdownMaximoVerde: formData.get("drawdownMaximoVerde"),
+    drawdownMaximoAmarelo: formData.get("drawdownMaximoAmarelo"),
+  });
+
+  const configAtual = await prisma.configGeral.findUnique({ where: { id: "config" } });
+
+  await prisma.configGeral.upsert({
+    where: { id: "config" },
+    update: { thresholdsSaude: dados },
+    create: {
+      id: "config",
+      capitalReferencia: configAtual?.capitalReferencia ?? 0,
+      metaMensalPercentual: configAtual?.metaMensalPercentual ?? 0,
+      thresholdsSaude: dados,
+    },
+  });
+
+  revalidatePath("/admin/configuracoes");
+  revalidatePath("/admin");
+}

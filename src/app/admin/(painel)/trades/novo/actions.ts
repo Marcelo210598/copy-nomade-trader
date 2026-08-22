@@ -3,9 +3,6 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { calcularResultadoTrade } from "@/lib/calculo-trade";
 
@@ -47,12 +44,6 @@ export async function criarTrade(formData: FormData) {
     capitalReferencia: configGeral.capitalReferencia,
   });
 
-  let printUrl: string | null = null;
-  const printFile = formData.get("print");
-  if (printFile instanceof File && printFile.size > 0) {
-    printUrl = await salvarPrint(printFile);
-  }
-
   await prisma.trade.create({
     data: {
       data: new Date(`${dados.data}T00:00:00`),
@@ -65,7 +56,6 @@ export async function criarTrade(formData: FormData) {
       resultadoDolar,
       retornoPercentual,
       observacao: dados.observacao || null,
-      printUrl,
       publicado: dados.publicado === "true",
     },
   });
@@ -73,16 +63,4 @@ export async function criarTrade(formData: FormData) {
   revalidatePath("/admin/trades");
   revalidatePath("/");
   redirect("/admin/trades?criado=1");
-}
-
-// Salva localmente em /public/uploads — funciona em localhost.
-// TODO: trocar por Vercel Blob antes do deploy (filesystem do Vercel é read-only).
-async function salvarPrint(file: File): Promise<string> {
-  const bytes = Buffer.from(await file.arrayBuffer());
-  const extensao = file.name.split(".").pop() || "png";
-  const nomeArquivo = `${randomUUID()}.${extensao}`;
-  const pasta = path.join(process.cwd(), "public", "uploads", "trades");
-  await mkdir(pasta, { recursive: true });
-  await writeFile(path.join(pasta, nomeArquivo), bytes);
-  return `/uploads/trades/${nomeArquivo}`;
 }

@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 import { prisma } from "@/lib/prisma";
-import { alternarAtivo, criarAtivo, salvarConfigGeral } from "./actions";
+import { parseThresholds } from "@/lib/semaforo-saude";
+import { alternarAtivo, criarAtivo, salvarConfigGeral, salvarThresholdsSaude } from "./actions";
 
 export default async function ConfiguracoesPage() {
   const [ativos, configGeral] = await Promise.all([
     prisma.configAtivo.findMany({ orderBy: { nome: "asc" } }),
     prisma.configGeral.findUnique({ where: { id: "config" } }),
   ]);
+
+  const thresholds = parseThresholds(configGeral?.thresholdsSaude);
 
   return (
     <div className="flex flex-col gap-8">
@@ -112,6 +115,90 @@ export default async function ConfiguracoesPage() {
           </div>
           <Button type="submit" className="w-fit">
             Salvar
+          </Button>
+        </form>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Semáforo de saúde</CardTitle>
+        </CardHeader>
+        <p className="mb-4 -mt-2 text-sm text-muted">
+          Calculado sobre win rate, expectância e drawdown recente (últimos 30 dias). Só aparece
+          no painel interno.
+        </p>
+
+        <form action={salvarThresholdsSaude} className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="winRateMinimoVerde">🟢 Win rate mínimo (%)</Label>
+              <Input
+                id="winRateMinimoVerde"
+                name="winRateMinimoVerde"
+                type="number"
+                step="1"
+                defaultValue={thresholds.winRateMinimoVerde}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="winRateMinimoAmarelo">🟡 Win rate mínimo (%)</Label>
+              <Input
+                id="winRateMinimoAmarelo"
+                name="winRateMinimoAmarelo"
+                type="number"
+                step="1"
+                defaultValue={thresholds.winRateMinimoAmarelo}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="expectanciaMinimaVerde">🟢 Expectância mínima (%)</Label>
+              <Input
+                id="expectanciaMinimaVerde"
+                name="expectanciaMinimaVerde"
+                type="number"
+                step="0.1"
+                defaultValue={thresholds.expectanciaMinimaVerde}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="expectanciaMinimaAmarela">🟡 Expectância mínima (%)</Label>
+              <Input
+                id="expectanciaMinimaAmarela"
+                name="expectanciaMinimaAmarela"
+                type="number"
+                step="0.1"
+                defaultValue={thresholds.expectanciaMinimaAmarela}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="drawdownMaximoVerde">🟢 Drawdown máximo (%)</Label>
+              <Input
+                id="drawdownMaximoVerde"
+                name="drawdownMaximoVerde"
+                type="number"
+                step="1"
+                defaultValue={thresholds.drawdownMaximoVerde}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="drawdownMaximoAmarelo">🟡 Drawdown máximo (%)</Label>
+              <Input
+                id="drawdownMaximoAmarelo"
+                name="drawdownMaximoAmarelo"
+                type="number"
+                step="1"
+                defaultValue={thresholds.drawdownMaximoAmarelo}
+                required
+              />
+            </div>
+          </div>
+          <Button type="submit" className="w-fit">
+            Salvar thresholds
           </Button>
         </form>
       </Card>
