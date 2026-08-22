@@ -1,0 +1,151 @@
+// Copy Nômade Trader — schema do banco (Neon PostgreSQL)
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Trades (operações lançadas pelo Matheus)
+// ─────────────────────────────────────────────
+
+enum LadoOperacao {
+  COMPRA
+  VENDA
+}
+
+model Trade {
+  id String @id @default(cuid())
+
+  data DateTime // data/hora da operação
+
+  ativo      String // referencia ConfigAtivo.nome (não é FK forçada de propósito: histórico não pode quebrar se um ativo for renomeado/desativado)
+  lado       LadoOperacao
+  precoEntrada Float
+  precoSaida   Float
+  contratos    Int
+
+  // calculados no momento do lançamento (persistidos, não derivados on-the-fly,
+  // pra manter histórico estável mesmo se valorPorPonto ou capitalReferencia mudarem depois)
+  resultadoPontos    Float
+  resultadoDolar     Float
+  retornoPercentual  Float
+
+  observacao String?
+  printUrl   String?
+
+  publicado Boolean @default(false)
+
+  criadoEm  DateTime  @default(now())
+  editadoEm DateTime? // último ajuste (null = nunca editado)
+
+  edicoes TradeEdicao[]
+
+  @@index([data])
+  @@index([publicado])
+}
+
+// Log de correções — cada edição de um trade já publicado gera uma entrada aqui.
+// Nunca sobrescreve silenciosamente: guarda o snapshot antes/depois + motivo.
+model TradeEdicao {
+  id      String @id @default(cuid())
+  tradeId String
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  campoAlterado String // ex: "precoSaida", "contratos", "data" — ou "multiplos" se mexeu em vários campos
+  valorAnterior Json // snapshot dos campos afetados antes da edição
+  valorNovo     Json // snapshot dos campos afetados depois da edição
+  motivo        String
+
+  editadoEm DateTime @default(now())
+
+  @@index([tradeId])
+}
+
+// ─────────────────────────────────────────────
+// Configurações
+// ─────────────────────────────────────────────
+
+model ConfigAtivo {
+  id           String  @id @default(cuid())
+  nome         String  @unique // NQ, MNQ, ES, MES...
+  valorPorPonto Float
+  ativo        Boolean @default(true) // permite "desativar" sem apagar histórico
+
+  criadoEm DateTime @default(now())
+}
+
+// Singleton de configuração geral (sempre id = "config")
+model ConfigGeral {
+  id String @id @default("config")
+
+  capitalReferencia   Float // usado pra calcular retornoPercentual dos trades
+  metaMensalPercentual Float @default(0)
+
+  // thresholds do semáforo de saúde (🟢🟡🔴), calculado sobre expectância/win rate/drawdown
+  thresholdsSaude Json @default("{}")
+
+  atualizadoEm DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// Investidores (área logada via magic link)
+// ─────────────────────────────────────────────
+
+model Investidor {
+  id    String  @id @default(cuid())
+  email String  @unique
+
+  capitalInicial Float? // preenchido no primeiro acesso (onboarding)
+  dataInicio     DateTime? // trades antes dessa data não contam pro saldo dele
+
+  criadoEm DateTime @default(now())
+
+  accounts Account[]
+  sessions Session[]
+}
+
+// ─────────────────────────────────────────────
+// Tabelas padrão do NextAuth (Email/magic link via Resend)
+// ─────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  investidorId      String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  investidor Investidor @relation(fields: [investidorId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  investidorId String
+  expires      DateTime
+
+  investidor Investidor @relation(fields: [investidorId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Copy Nomade Trader — design tokens
+  Terminal financeiro premium: fundo escuro petróleo, acento âmbar
+  (referência Bloomberg Terminal), sem light mode — é um produto
+  com identidade visual fixa, não um app utilitário.
+*/
+:root {
+  --background: #0a0d0f;
+  --surface: #14181c;
+  --elevated: #1c2126;
+  --border: #262b31;
+
+  --foreground: #f2ede2;
+  --muted: #8b8578;
+
+  --accent: #e8a33d;
+  --accent-foreground: #0a0d0f;
+  --accent-muted: rgba(232, 163, 61, 0.12);
+
+  --profit: #34d399;
+  --loss: #f0553e;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* scrollbar discreta, combina com a superfície escura */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--elevated);
+  border-radius: 999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* números financeiros: sempre monoespaçado e com largura fixa por dígito */
+  .font-tabular {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+}
