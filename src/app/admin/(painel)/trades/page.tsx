@@ -40,7 +40,10 @@ export default async function TradesPage({
         <div className="flex flex-col gap-2">
           {trades.map((trade) => (
             <Card key={trade.id} className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+              <Link
+                href={`/admin/trades/${trade.id}`}
+                className="flex flex-1 items-center gap-4 rounded-lg transition-colors hover:opacity-80"
+              >
                 <span className="w-12 font-tabular text-sm font-semibold">{trade.ativo}</span>
                 <div>
                   <div className="flex items-center gap-2">
@@ -58,7 +61,7 @@ export default async function TradesPage({
                     </p>
                   )}
                 </div>
-              </div>
+              </Link>
 
               <div className="flex items-center gap-4">
                 <StatNumber
