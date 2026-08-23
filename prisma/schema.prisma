@@ -95,9 +95,13 @@ model ConfigGeral {
 
 // ─────────────────────────────────────────────
 // Investidores (área logada via magic link)
+//
+// Model chamado "User" (não "Investidor") porque o @auth/prisma-adapter
+// exige esse nome exato + o campo "userId" em Account/Session — é a
+// modelagem padrão do NextAuth, só com os campos de negócio extras.
 // ─────────────────────────────────────────────
 
-model Investidor {
+model User {
   id    String  @id @default(cuid())
   email String  @unique
 
@@ -108,6 +112,8 @@ model Investidor {
 
   accounts Account[]
   sessions Session[]
+
+  @@map("investidores")
 }
 
 // ─────────────────────────────────────────────
@@ -116,7 +122,7 @@ model Investidor {
 
 model Account {
   id                String  @id @default(cuid())
-  investidorId      String
+  userId            String
   type              String
   provider          String
   providerAccountId String
@@ -128,7 +134,7 @@ model Account {
   id_token          String? @db.Text
   session_state     String?
 
-  investidor Investidor @relation(fields: [investidorId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -136,10 +142,10 @@ model Account {
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
-  investidorId String
+  userId       String
   expires      DateTime
 
-  investidor Investidor @relation(fields: [investidorId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
