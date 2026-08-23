@@ -50,12 +50,23 @@
   - Saldo dos investidores é sempre derivado on-the-fly dos trades publicados (não persistido) → a correção já reflete automaticamente assim que a área do investidor existir, sem precisar de um passo extra de "recálculo"
   - Testado de ponta a ponta: criei um trade, editei o preço de saída, conferi o histórico com antes/depois batendo, apaguei os dados de teste depois
 
+- **Área do investidor (magic link + saldo):**
+  - NextAuth v5 + `@auth/prisma-adapter` + provider Resend (sem senha)
+  - Model `Investidor` renomeado pra `User` no schema (exigência do adapter — nomes fixos `User`/`userId`), mapeado pra tabela física `investidores` via `@@map`
+  - Sessão em JWT (não "database") — necessário pro middleware (Edge runtime não fala com Prisma)
+  - `src/middleware.ts` agora protege `/admin/*` e `/investidor/*` no mesmo arquivo
+  - Onboarding no primeiro acesso (capital inicial + data de entrada) antes de mostrar o saldo
+  - `src/lib/saldo-investidor.ts`: composto (reaplica % sobre saldo acumulado) vs linear (% sempre sobre capital inicial), toggle + gráfico com as duas curvas
+  - Testado: login redireciona certo, e-mail de magic link confirmado enviado (log 200 no Resend, destinatário certo, remetente `onboarding@resend.dev` — domínio de teste, funciona mas só entrega pro e-mail cadastrado na conta Resend)
+  - **Pendente confirmação do Marcelo:** ele recebeu o e-mail e ainda não clicou no link — onboarding e tela de saldo ainda não foram vistos rodando de verdade, só a lógica e o cálculo foram conferidos no código
+
 ## 🚧 TODO conhecido (não bloqueante agora)
 - Upload de print removido do formulário por pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
+- `EMAIL_FROM` usando domínio de teste da Resend (`onboarding@resend.dev`) — trocar por domínio próprio verificado antes de mandar magic link pra investidores de verdade (não só pro próprio Marcelo)
 
 ## 📋 Próximos passos
-1. Trocar dados mock da página pública por queries reais do Prisma
-2. Área do investidor (onboarding, magic link via Resend, saldo composto vs linear)
+1. Marcelo clicar no magic link recebido e confirmar que onboarding + saldo funcionam
+2. Trocar dados mock da página pública por queries reais do Prisma
 
 ## 🔧 Configurações importantes
 - `DATABASE_URL` (Neon) — ainda não configurada, usando placeholder
