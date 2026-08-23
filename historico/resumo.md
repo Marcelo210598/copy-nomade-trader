@@ -4,6 +4,6 @@ Plataforma standalone pro Matheus (trader/mentor) vender copytrade via históric
 
 Stack: Next.js 14 + TS + Prisma 6 + Neon + Tailwind + NextAuth v5 (Resend).
 
-22/08/2026: as 3 áreas do roteiro original estão prontas e testadas (painel interno completo, página pública com dados reais, área do investidor com magic link) contra o Neon real. Repo: https://github.com/Marcelo210598/copy-nomade-trader
+22/08/2026: NO AR EM PRODUÇÃO — https://copy-nomade-trader.vercel.app. As 3 áreas do roteiro original prontas e testadas (painel interno completo, página pública com dados reais, área do investidor com magic link). Pendência conhecida: magic link pode cair no spam até ter domínio de e-mail próprio (ver progress.md). Repo: https://github.com/Marcelo210598/copy-nomade-trader
 
 Ver `progress.md` na raiz do projeto para o estado atualizado.
