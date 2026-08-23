@@ -5,9 +5,16 @@
 ## 📌 Visão Geral
 - Objetivo: plataforma standalone pro Matheus divulgar/vender copytrade via histórico de resultados
 - Stack: Next.js 14 + TypeScript + Prisma + Neon + Tailwind + NextAuth v5 (magic link/Resend)
-- Status: **as 3 áreas do roteiro original estão prontas e testadas** (painel interno, página pública com dados reais, área do investidor) — próximo é polish/deploy
+- Status: **NO AR EM PRODUÇÃO** — https://copy-nomade-trader.vercel.app — todas as 3 áreas do roteiro original prontas e testadas em produção de verdade
 - Repo: https://github.com/Marcelo210598/copy-nomade-trader
 - Banco de teste sempre fica limpo entre sessões (Marcelo pediu pra sempre apagar dados de teste gerados)
+
+## 🚀 Deploy em produção (22/08/2026)
+- Projeto conectado na Vercel pelo Marcelo, deploy automático a cada push na main
+- **Bugs achados só em produção (build/runtime), corrigidos no mesmo dia** — ver seção de problemas abaixo
+- 7 env vars configuradas na Vercel: `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `AUTH_SECRET`, `AUTH_URL`, `RESEND_API_KEY`, `EMAIL_FROM`
+- **Senha do admin em produção é DIFERENTE da de dev** (`admin123` só existe no `.env` local) — gerada uma senha forte só pra produção, o Marcelo tem o valor
+- Testado ao vivo: home pública carregando dados reais do Neon, login do painel interno funcionando, dashboard carregando (empty state, banco limpo)
 
 ## ✅ Concluído
 - Projeto Next.js 14 (App Router, TS, Tailwind, src/dir) criado
@@ -65,18 +72,26 @@
   - Empty states tratados (zero trades publicados, melhor trade null)
   - Testado com 3 trades sintéticos: win rate 66,7%, retorno +1,20%, curva e ordem da lista batendo — apagado depois
 
+- **Bugs de deploy (só apareceram em build/runtime de produção):**
+  - `package.json` não gerava o Prisma Client no build (`prisma generate`) — quebraria em qualquer ambiente limpo, incluindo Vercel
+  - Middleware (Edge runtime) importava o Prisma Client inteiro de forma indireta via `auth.ts` — separado em `auth.config.ts` (leve, sem adapter, usado no middleware) e `auth.ts` (completo, só em Node runtime)
+  - `/admin/configuracoes`, `/admin/trades/novo`, `/admin` (dashboard) e `/investidor` foram geradas como páginas **estáticas** em pelo menos um build — dados do Prisma ficariam "congelados" do momento do build. Corrigido com `export const dynamic = "force-dynamic"` explícito em todas
+  - `prisma.config.ts` fazia `import "dotenv/config"` sem ter `dotenv` como dependência declarada — funcionava local por acaso (hoisting), quebrava o `npm install` inteiro na Vercel (`Failed to load config file`). Removido — schema já declara `DATABASE_URL` via `env()` diretamente
+  - Erro de lint (aspas não escapadas) quebrando `next build`
+  - Após configurar as env vars na Vercel, `DATABASE_URL` resolveu vazia no primeiro deploy — Prisma reclamou de "empty string". Todas as 7 variáveis foram reconfiguradas com certeza (algumas o Marcelo já tinha preenchido, outras não)
+
 ## 🚧 TODO conhecido (não bloqueante agora)
 - Upload de print removido do formulário por pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
 - `EMAIL_FROM` usando domínio de teste da Resend (`onboarding@resend.dev`) — trocar por domínio próprio verificado antes de mandar magic link pra investidores de verdade (não só pro próprio Marcelo)
 - Neon no plano free hiberna por inatividade (autosuspend) — primeira requisição depois de um tempo parado pode dar erro de conexão; a segunda tentativa sempre funciona (banco "acorda"). Normal, não é bug.
 
 ## 📋 Próximos passos
-- Todos os marcos do roteiro original (layout, painel interno, página pública, área do investidor) estão prontos e testados. Falta alinhar com o Marcelo o que vem depois — candidatos: cadastro/gestão de investidores pelo admin, domínio de e-mail próprio pra produção, deploy na Vercel, reativar upload de print.
+- Todos os marcos do roteiro original (layout, painel interno, página pública, área do investidor) estão prontos, testados e **no ar em produção**. Falta alinhar com o Marcelo o que vem depois — candidatos: cadastro/gestão de investidores pelo admin, domínio de e-mail próprio, reativar upload de print, domínio customizado (não `.vercel.app`).
 
 ## 🔧 Configurações importantes
-- `DATABASE_URL` (Neon) — ainda não configurada, usando placeholder
-- `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` — painel interno
-- `AUTH_SECRET` / `RESEND_API_KEY` / `EMAIL_FROM` — magic link do investidor
+- `DATABASE_URL` (Neon) — configurada local (`.env`) e em produção (Vercel), mesmo banco pros dois por enquanto
+- `ADMIN_PASSWORD` / `ADMIN_SESSION_SECRET` — painel interno. **Senha de produção é diferente da de dev** (`admin123` só existe local)
+- `AUTH_SECRET` / `AUTH_URL` / `RESEND_API_KEY` / `EMAIL_FROM` — magic link do investidor. `AUTH_URL` em produção = `https://copy-nomade-trader.vercel.app`
 
 ## 📚 Dependências principais
 - next@14.2.x, prisma@6, @prisma/client@6, next-auth@5.0.0-beta, @auth/prisma-adapter, resend, zod, date-fns, recharts
