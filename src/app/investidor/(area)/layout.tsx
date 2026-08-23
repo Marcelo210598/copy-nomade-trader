@@ -1,7 +1,25 @@
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { logoutInvestidor } from "./actions";
 
-export default function AreaInvestidorLayout({ children }: { children: React.ReactNode }) {
+export default async function AreaInvestidorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+
+  // busca do banco em vez de confiar no JWT: o token não recarrega sozinho
+  // depois que o onboarding atualiza o nome no banco
+  const investidor = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true },
+      })
+    : null;
+  const primeiroNome = investidor?.name?.split(" ")[0];
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -12,14 +30,17 @@ export default function AreaInvestidorLayout({ children }: { children: React.Rea
               Copy Nomade Trader
             </span>
           </Link>
-          <form action={logoutInvestidor}>
-            <button
-              type="submit"
-              className="text-sm text-muted transition-colors hover:text-loss"
-            >
-              Sair
-            </button>
-          </form>
+          <div className="flex items-center gap-4">
+            {primeiroNome && <span className="text-sm text-muted">Olá, {primeiroNome}</span>}
+            <form action={logoutInvestidor}>
+              <button
+                type="submit"
+                className="text-sm text-muted transition-colors hover:text-loss"
+              >
+                Sair
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 

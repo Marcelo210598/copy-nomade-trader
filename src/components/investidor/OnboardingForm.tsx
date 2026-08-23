@@ -10,6 +10,11 @@ export function OnboardingForm() {
   return (
     <form action={completarOnboarding} className="flex flex-col gap-5">
       <div>
+        <Label htmlFor="nome">Nome</Label>
+        <Input id="nome" name="nome" type="text" placeholder="Seu nome" required />
+      </div>
+
+      <div>
         <Label htmlFor="capitalInicial">Capital inicial (R$)</Label>
         <Input
           id="capitalInicial"
