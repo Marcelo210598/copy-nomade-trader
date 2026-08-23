@@ -1,11 +1,11 @@
 # Copy Nômade Trader - Progresso
 
-## Última atualização: 22/08/2026
+## Última atualização: 22/08/2026 (noite)
 
 ## 📌 Visão Geral
 - Objetivo: plataforma standalone pro Matheus divulgar/vender copytrade via histórico de resultados
 - Stack: Next.js 14 + TypeScript + Prisma + Neon + Tailwind + NextAuth v5 (magic link/Resend)
-- Status: **painel interno completo** (login, configurações, lançamento de trade, dashboard com período/meta/semáforo) testado de ponta a ponta contra o Neon real e publicado no GitHub
+- Status: **as 3 áreas do roteiro original estão prontas e testadas** (painel interno, página pública com dados reais, área do investidor) — próximo é polish/deploy
 - Repo: https://github.com/Marcelo210598/copy-nomade-trader
 - Banco de teste sempre fica limpo entre sessões (Marcelo pediu pra sempre apagar dados de teste gerados)
 
@@ -60,13 +60,18 @@
   - Testado: login redireciona certo, e-mail de magic link enviado (Resend), Marcelo clicou no link, onboarding e tela de saldo (composto/linear + gráfico) confirmados rodando certinho com print dele
   - **Bug achado e corrigido no teste real:** faltava `emailVerified` (+ `name`/`image`) no model `User` — o `@auth/prisma-adapter` exige esses campos e sem eles o primeiro login quebrava com `PrismaClientValidationError`. Só apareceu no clique real do link, não em nenhum teste anterior — migration `20260823000646_adiciona_campos_padrao_nextauth` já aplicada
 
+- **Página pública com dados reais:**
+  - `src/lib/estatisticas-publicas.ts` substitui o mock: agrega trades publicados (win rate, retorno acumulado, melhor trade, curva de capital) e soma o saldo atual (composto) de cada investidor com onboarding completo pro card de capital sob acompanhamento
+  - Empty states tratados (zero trades publicados, melhor trade null)
+  - Testado com 3 trades sintéticos: win rate 66,7%, retorno +1,20%, curva e ordem da lista batendo — apagado depois
+
 ## 🚧 TODO conhecido (não bloqueante agora)
 - Upload de print removido do formulário por pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
 - `EMAIL_FROM` usando domínio de teste da Resend (`onboarding@resend.dev`) — trocar por domínio próprio verificado antes de mandar magic link pra investidores de verdade (não só pro próprio Marcelo)
+- Neon no plano free hiberna por inatividade (autosuspend) — primeira requisição depois de um tempo parado pode dar erro de conexão; a segunda tentativa sempre funciona (banco "acorda"). Normal, não é bug.
 
 ## 📋 Próximos passos
-1. Trocar dados mock da página pública por queries reais do Prisma
-2. Decidir: apagar o investidor de teste (conta do próprio Marcelo, capital R$1.000, criada testando o onboarding) ou manter
+- Todos os marcos do roteiro original (layout, painel interno, página pública, área do investidor) estão prontos e testados. Falta alinhar com o Marcelo o que vem depois — candidatos: cadastro/gestão de investidores pelo admin, domínio de e-mail próprio pra produção, deploy na Vercel, reativar upload de print.
 
 ## 🔧 Configurações importantes
 - `DATABASE_URL` (Neon) — ainda não configurada, usando placeholder
