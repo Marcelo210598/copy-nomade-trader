@@ -82,7 +82,7 @@
 
 ## 🚧 TODO conhecido (não bloqueante agora)
 - Upload de print removido do formulário por pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
-- `EMAIL_FROM` usando domínio de teste da Resend (`onboarding@resend.dev`) — trocar por domínio próprio verificado antes de mandar magic link pra investidores de verdade (não só pro próprio Marcelo)
+- **`EMAIL_FROM` no domínio de teste da Resend é mais grave do que "só entrega pro dono da conta"**: o magic link do Marcelo em produção foi enviado e "Delivered" (confirmado no painel Resend), mas não apareceu na caixa de entrada — a Resend sinaliza "Needs attention: Ensure link URLs match sending domain" (remetente `onboarding@resend.dev` vs link `copy-nomade-trader.vercel.app`), padrão clássico de phishing que o Gmail tende a jogar pro spam mesmo com entrega confirmada no servidor. **Bloqueia a área do investidor até ter domínio próprio verificado** — checar a pasta de spam por enquanto
 - Neon no plano free hiberna por inatividade (autosuspend) — primeira requisição depois de um tempo parado pode dar erro de conexão; a segunda tentativa sempre funciona (banco "acorda"). Normal, não é bug.
 
 ## 📋 Próximos passos
