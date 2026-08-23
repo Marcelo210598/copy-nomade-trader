@@ -110,6 +110,7 @@ model User {
 
   capitalInicial Float? // preenchido no primeiro acesso (onboarding)
   dataInicio     DateTime? // trades antes dessa data não contam pro saldo dele
+  entradaConfirmadaEm DateTime? // timestamp exato do onboarding — usado só pra desempatar trades do mesmo dia de dataInicio (trade lançado antes de confirmar não conta, depois conta)
 
   criadoEm DateTime @default(now())
 

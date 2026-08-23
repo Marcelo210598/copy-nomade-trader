@@ -32,6 +32,7 @@ export async function completarOnboarding(formData: FormData) {
       name: dados.nome,
       capitalInicial: dados.capitalInicial,
       dataInicio: new Date(`${dados.dataInicio}T00:00:00`),
+      entradaConfirmadaEm: new Date(),
     },
   });
 

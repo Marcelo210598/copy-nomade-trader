@@ -4,7 +4,7 @@ import { OnboardingForm } from "@/components/investidor/OnboardingForm";
 import { SaldoComparativo } from "@/components/investidor/SaldoComparativo";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { calcularSaldoInvestidor } from "@/lib/saldo-investidor";
+import { calcularSaldoInvestidor, filtrarTradesDoInvestidor } from "@/lib/saldo-investidor";
 
 export const dynamic = "force-dynamic";
 
@@ -32,11 +32,15 @@ export default async function AreaInvestidorPage() {
     );
   }
 
-  const trades = await prisma.trade.findMany({
+  const tradesDoDiaEmDiante = await prisma.trade.findMany({
     where: { publicado: true, data: { gte: investidor.dataInicio } },
     orderBy: { data: "asc" },
   });
 
+  const trades = filtrarTradesDoInvestidor(tradesDoDiaEmDiante, {
+    dataInicio: investidor.dataInicio,
+    entradaConfirmadaEm: investidor.entradaConfirmadaEm,
+  });
   const resultado = calcularSaldoInvestidor(trades, investidor.capitalInicial);
 
   return (

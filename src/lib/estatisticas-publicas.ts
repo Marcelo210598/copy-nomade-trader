@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { calcularMetricasPeriodo } from "@/lib/metricas-trade";
-import { calcularSaldoInvestidor } from "@/lib/saldo-investidor";
+import { calcularSaldoInvestidor, filtrarTradesDoInvestidor } from "@/lib/saldo-investidor";
 import type { TradePublico } from "@/components/public/TradeCard";
 
 export interface DadosPublicos {
@@ -26,7 +26,11 @@ export async function buscarDadosPublicos(): Promise<DadosPublicos> {
   let capitalTotalAcompanhamento = 0;
   for (const investidor of investidores) {
     if (!investidor.capitalInicial || !investidor.dataInicio) continue;
-    const tradesDoInvestidor = tradesPublicados.filter((t) => t.data >= investidor.dataInicio!);
+    const tradesDoDiaEmDiante = tradesPublicados.filter((t) => t.data >= investidor.dataInicio!);
+    const tradesDoInvestidor = filtrarTradesDoInvestidor(tradesDoDiaEmDiante, {
+      dataInicio: investidor.dataInicio!,
+      entradaConfirmadaEm: investidor.entradaConfirmadaEm,
+    });
     const saldo = calcularSaldoInvestidor(tradesDoInvestidor, investidor.capitalInicial);
     capitalTotalAcompanhamento += saldo.saldoAtualComposto;
   }
