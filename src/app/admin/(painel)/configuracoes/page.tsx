@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { parseThresholds } from "@/lib/semaforo-saude";
 import { alternarAtivo, criarAtivo, salvarConfigGeral, salvarThresholdsSaude } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function ConfiguracoesPage() {
   const [ativos, configGeral] = await Promise.all([
     prisma.configAtivo.findMany({ orderBy: { nome: "asc" } }),

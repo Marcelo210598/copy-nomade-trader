@@ -2,8 +2,12 @@ import NextAuth from "next-auth";
 import Resend from "next-auth/providers/resend";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { authConfig } from "./auth.config";
 
+// Config completa (Node runtime — rotas, server actions). Usa o Prisma
+// adapter, por isso não pode ser importada pelo middleware (veja auth.config.ts).
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
     Resend({
@@ -11,21 +15,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       from: process.env.EMAIL_FROM,
     }),
   ],
-  // JWT em vez de sessão no banco: o middleware roda em Edge runtime e não
-  // consegue falar com o Prisma pra validar sessão via banco a cada request.
-  session: { strategy: "jwt" },
-  pages: {
-    signIn: "/investidor/login",
-    verifyRequest: "/investidor/verifique-email",
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && token.id) session.user.id = token.id as string;
-      return session;
-    },
-  },
 });

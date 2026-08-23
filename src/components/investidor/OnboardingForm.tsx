@@ -21,8 +21,8 @@ export function OnboardingForm() {
           required
         />
         <p className="mt-1 text-xs text-muted">
-          O valor que você tá "colocando" pra acompanhar o copy — nada disso é movimentado de
-          verdade.
+          O valor que você tá &ldquo;colocando&rdquo; pra acompanhar o copy — nada disso é
+          movimentado de verdade.
         </p>
       </div>
 

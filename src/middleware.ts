@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { ADMIN_COOKIE_NAME, validarTokenSessao } from "@/lib/admin-auth";
+
+// Instância própria do NextAuth só com a config leve (sem Prisma adapter) —
+// o middleware roda em Edge runtime e só precisa decodificar o JWT do cookie.
+const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
   const { pathname } = req.nextUrl;

@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/Card";
 import { TradeForm } from "@/components/admin/TradeForm";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function NovoTradePage() {
   const [ativos, configGeral] = await Promise.all([
     prisma.configAtivo.findMany({ where: { ativo: true }, orderBy: { nome: "asc" } }),
