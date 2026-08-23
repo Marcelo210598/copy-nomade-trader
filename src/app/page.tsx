@@ -4,10 +4,14 @@ import { StatNumber } from "@/components/ui/StatNumber";
 import { Button } from "@/components/ui/Button";
 import { TradeCard } from "@/components/public/TradeCard";
 import { CurvaCapitalChart } from "@/components/charts/CurvaCapitalChart";
-import { tradesMock, curvaCapitalMock, statsMock } from "@/lib/mock-data";
+import { buscarDadosPublicos } from "@/lib/estatisticas-publicas";
 import { formatarMoeda, formatarPercentual } from "@/lib/utils";
 
-export default function PaginaPublica() {
+export const dynamic = "force-dynamic";
+
+export default async function PaginaPublica() {
+  const dados = await buscarDadosPublicos();
+
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
@@ -36,8 +40,8 @@ export default function PaginaPublica() {
           Resultado real, mostrado em público, trade a trade.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-muted">
-          Acompanhe o histórico de operações do Matheus em NQ, MNQ e ES.
-          Sem promessa — números publicados conforme acontecem.
+          Acompanhe o histórico de operações do Matheus em NQ, MNQ e ES. Sem promessa — números
+          publicados conforme acontecem.
         </p>
       </section>
 
@@ -49,17 +53,18 @@ export default function PaginaPublica() {
           </p>
           <div className="mt-2 flex items-baseline gap-3">
             <StatNumber
-              value={formatarMoeda(statsMock.capitalTotalAcompanhamento)}
+              value={formatarMoeda(dados.capitalTotalAcompanhamento)}
               tone="accent"
               size="xl"
             />
             <span className="font-tabular text-sm text-muted">
-              {statsMock.numeroInvestidores} investidores acompanhando
+              {dados.numeroInvestidores}{" "}
+              {dados.numeroInvestidores === 1 ? "investidor acompanhando" : "investidores acompanhando"}
             </span>
           </div>
           <p className="mt-3 text-xs text-muted">
-            Valores simulados com base no capital informado por cada usuário — a
-            plataforma não custodia nem movimenta dinheiro real.
+            Valores simulados com base no capital informado por cada usuário — a plataforma não
+            custodia nem movimenta dinheiro real.
           </p>
         </Card>
       </section>
@@ -68,23 +73,23 @@ export default function PaginaPublica() {
       <section className="mx-auto grid max-w-5xl grid-cols-2 gap-4 px-6 pb-10 md:grid-cols-4">
         <Card>
           <CardTitle>Win rate</CardTitle>
-          <StatNumber value={`${statsMock.winRate.toString().replace(".", ",")}%`} size="md" />
+          <StatNumber value={`${dados.winRate.toFixed(1).replace(".", ",")}%`} size="md" />
         </Card>
         <Card>
           <CardTitle>Retorno acumulado</CardTitle>
-          <StatNumber
-            value={formatarPercentual(statsMock.retornoAcumulado)}
-            tone="auto"
-            size="md"
-          />
+          <StatNumber value={formatarPercentual(dados.retornoAcumulado)} tone="auto" size="md" />
         </Card>
         <Card>
           <CardTitle>Trades publicados</CardTitle>
-          <StatNumber value={String(statsMock.numeroTrades)} size="md" />
+          <StatNumber value={String(dados.numeroTrades)} size="md" />
         </Card>
         <Card>
           <CardTitle>Melhor trade</CardTitle>
-          <StatNumber value="+3,40%" tone="profit" size="md" />
+          <StatNumber
+            value={dados.melhorTrade !== null ? formatarPercentual(dados.melhorTrade) : "—"}
+            tone="auto"
+            size="md"
+          />
         </Card>
       </section>
 
@@ -94,18 +99,27 @@ export default function PaginaPublica() {
           <CardHeader>
             <CardTitle>Curva de capital acumulada</CardTitle>
           </CardHeader>
-          <CurvaCapitalChart dados={curvaCapitalMock} />
+          <CurvaCapitalChart dados={dados.curvaCapital} />
         </Card>
       </section>
 
       {/* Lista de trades */}
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <h2 className="mb-4 font-display text-lg font-semibold">Últimas operações</h2>
-        <div className="flex flex-col gap-3">
-          {tradesMock.map((trade) => (
-            <TradeCard key={trade.id} trade={trade} />
-          ))}
-        </div>
+        {dados.trades.length === 0 ? (
+          <Card>
+            <p className="text-sm text-muted">
+              Nenhuma operação publicada ainda — assim que o Matheus lançar o primeiro trade, ele
+              aparece aqui.
+            </p>
+          </Card>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {dados.trades.map((trade) => (
+              <TradeCard key={trade.id} trade={trade} />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
