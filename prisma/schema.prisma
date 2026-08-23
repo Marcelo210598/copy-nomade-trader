@@ -102,8 +102,11 @@ model ConfigGeral {
 // ─────────────────────────────────────────────
 
 model User {
-  id    String  @id @default(cuid())
-  email String  @unique
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime? // setado pelo adapter quando o magic link é confirmado
+  name          String?
+  image         String?
 
   capitalInicial Float? // preenchido no primeiro acesso (onboarding)
   dataInicio     DateTime? // trades antes dessa data não contam pro saldo dele
