@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { formatarPercentual } from "@/lib/utils";
 import { alternarPublicado } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function TradesPage({
   searchParams,
 }: {

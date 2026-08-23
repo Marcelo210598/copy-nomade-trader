@@ -3,6 +3,8 @@ import { Card } from "@/components/ui/Card";
 import { TradeEditForm } from "@/components/admin/TradeEditForm";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditarTradePage({ params }: { params: { id: string } }) {
   const [trade, ativos, configGeral] = await Promise.all([
     prisma.trade.findUnique({ where: { id: params.id } }),

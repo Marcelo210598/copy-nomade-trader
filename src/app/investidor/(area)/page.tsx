@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calcularSaldoInvestidor } from "@/lib/saldo-investidor";
 
+export const dynamic = "force-dynamic";
+
 export default async function AreaInvestidorPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/investidor/login");

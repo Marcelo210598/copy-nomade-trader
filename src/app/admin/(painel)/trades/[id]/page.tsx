@@ -7,6 +7,8 @@ import { StatNumber } from "@/components/ui/StatNumber";
 import { prisma } from "@/lib/prisma";
 import { formatarComSinal, formatarMoeda, formatarPercentual } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 interface SnapshotTrade {
   data?: string;
   ativo?: string;
