@@ -57,16 +57,16 @@
   - `src/middleware.ts` agora protege `/admin/*` e `/investidor/*` no mesmo arquivo
   - Onboarding no primeiro acesso (capital inicial + data de entrada) antes de mostrar o saldo
   - `src/lib/saldo-investidor.ts`: composto (reaplica % sobre saldo acumulado) vs linear (% sempre sobre capital inicial), toggle + gráfico com as duas curvas
-  - Testado: login redireciona certo, e-mail de magic link confirmado enviado (log 200 no Resend, destinatário certo, remetente `onboarding@resend.dev` — domínio de teste, funciona mas só entrega pro e-mail cadastrado na conta Resend)
-  - **Pendente confirmação do Marcelo:** ele recebeu o e-mail e ainda não clicou no link — onboarding e tela de saldo ainda não foram vistos rodando de verdade, só a lógica e o cálculo foram conferidos no código
+  - Testado: login redireciona certo, e-mail de magic link enviado (Resend), Marcelo clicou no link, onboarding e tela de saldo (composto/linear + gráfico) confirmados rodando certinho com print dele
+  - **Bug achado e corrigido no teste real:** faltava `emailVerified` (+ `name`/`image`) no model `User` — o `@auth/prisma-adapter` exige esses campos e sem eles o primeiro login quebrava com `PrismaClientValidationError`. Só apareceu no clique real do link, não em nenhum teste anterior — migration `20260823000646_adiciona_campos_padrao_nextauth` já aplicada
 
 ## 🚧 TODO conhecido (não bloqueante agora)
 - Upload de print removido do formulário por pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
 - `EMAIL_FROM` usando domínio de teste da Resend (`onboarding@resend.dev`) — trocar por domínio próprio verificado antes de mandar magic link pra investidores de verdade (não só pro próprio Marcelo)
 
 ## 📋 Próximos passos
-1. Marcelo clicar no magic link recebido e confirmar que onboarding + saldo funcionam
-2. Trocar dados mock da página pública por queries reais do Prisma
+1. Trocar dados mock da página pública por queries reais do Prisma
+2. Decidir: apagar o investidor de teste (conta do próprio Marcelo, capital R$1.000, criada testando o onboarding) ou manter
 
 ## 🔧 Configurações importantes
 - `DATABASE_URL` (Neon) — ainda não configurada, usando placeholder
