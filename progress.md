@@ -1,6 +1,6 @@
 # Copy Nômade Trader - Progresso
 
-## Última atualização: 22/08/2026 (noite)
+## Última atualização: 23/08/2026
 
 ## 📌 Visão Geral
 - Objetivo: plataforma standalone pro Matheus divulgar/vender copytrade via histórico de resultados
@@ -17,7 +17,12 @@
 - **Área do investidor (`/investidor`)**: magic link via Resend (sem senha), onboarding (nome + capital inicial + data de entrada), saldo composto vs linear lado a lado com toggle + gráfico
 - **Deploy em produção na Vercel**, deploy automático a cada push na `main`, 7 env vars configuradas
 
-## 🐛 Bugs encontrados e corrigidos (todos no mesmo dia)
+## 🆕 23/08/2026 — testes em produção + correção de regra de negócio
+- Bateria de testes completa em produção: tudo ✅ (login admin, config, lançamento/edição de trade, dashboard, página pública, onboarding)
+- **Bug corrigido**: trade lançado no sistema ANTES do investidor confirmar a entrada, mas do mesmo dia da `dataInicio` escolhida, contava indevidamente no saldo dele. Agora o model `User` tem `entradaConfirmadaEm DateTime?` (timestamp exato do onboarding) e `filtrarTradesDoInvestidor` (`src/lib/saldo-investidor.ts`) só desempata por horário (`trade.criadoEm` vs `entradaConfirmadaEm`) quando a confirmação foi no mesmo dia de `dataInicio` — entrada retroativa continua contando o dia inteiro. Aplicado em `/investidor` e em `estatisticas-publicas.ts`. Migration aplicada no Neon, build local testado, deploy feito.
+- Domínio de e-mail próprio (bug #7 abaixo) **adiado sem prazo** — decisão do Marcelo em 23/08, vai demorar pra ter domínio disponível.
+
+## 🐛 Bugs encontrados e corrigidos (todos no mesmo dia, 22/08 salvo indicação em contrário)
 1. **Prisma 7 instalado por padrão** pelo `create-next-app`/`prisma init` (breaking changes) → fixado em Prisma 6, compatível com `@auth/prisma-adapter`
 2. **Badge Compra/Venda** usava verde/vermelho e confundia com lucro/prejuízo → neutro; cor de resultado só no %/pontos
 3. **Card Melhor/Pior do dashboard** com tone fixo → "pior trade" aparecia vermelho mesmo positivo → `tone="auto"`
