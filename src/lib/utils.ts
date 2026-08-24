@@ -5,11 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Formata número como moeda BRL. */
+/** Formata número como moeda USD (operações e saldo são sempre em dólar). */
 export function formatarMoeda(valor: number): string {
   return valor.toLocaleString("pt-BR", {
     style: "currency",
-    currency: "BRL",
+    currency: "USD",
   });
 }
 
