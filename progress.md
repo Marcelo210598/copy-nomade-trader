@@ -1,6 +1,6 @@
 # Copy Nômade Trader - Progresso
 
-## Última atualização: 23/08/2026
+## Última atualização: 24/08/2026
 
 ## 📌 Visão Geral
 - Objetivo: plataforma standalone pro Matheus divulgar/vender copytrade via histórico de resultados
@@ -36,14 +36,21 @@
 6. **`DATABASE_URL` vazia no primeiro deploy na Vercel** mesmo configurada — reconfiguradas as 7 env vars com certeza
 7. **Magic link "Delivered" mas não aparecia na caixa de entrada do Marcelo** — investigado a fundo (chave Resend correta, chamada de API acontecendo, e-mail confirmado entregue no painel da Resend). Causa real: a própria Resend sinaliza "Needs attention: Ensure link URLs match sending domain" — remetente `onboarding@resend.dev` vs link `copy-nomade-trader.vercel.app`, padrão clássico de phishing que o Gmail tende a jogar pro spam mesmo com entrega confirmada no servidor. **Achado no spam.**
 
+## 🆕 24/08/2026 — dólar no saldo + login de investidor quebrado corrigido
+- **Saldo/valores trocados de R$ pra US$**: `formatarMoeda` em `src/lib/utils.ts` formatava como BRL um valor que já era dólar (`resultadoDolar`). Trocado `currency: "BRL"` → `"USD"` (mantendo locale `pt-BR` pro separador de milhar/decimal: `US$ 1.234,50`). Afeta saldo do investidor, painel admin e página pública — todos os lugares que usam `formatarMoeda`.
+- **BUG CRÍTICO encontrado e corrigido**: login de investidor via magic link só funcionava pro próprio Marcelo. `EMAIL_FROM` usava o domínio de teste da Resend (`onboarding@resend.dev`), que **só entrega pro e-mail dono da conta Resend** — pra qualquer outro destinatário a API da Resend recusa com 403, e isso derrubava a tela de login do investidor com o erro genérico do NextAuth ("Server error / problem with the server configuration"). Achado quando o Luiz (investidor real) tentou logar e caiu nessa tela.
+  - Fix: reaproveitado o domínio `meutrade.app`, já verificado na conta Resend (de outro projeto). `EMAIL_FROM` trocado pra `Copy Nomade Trader <login@meutrade.app>` — atualizado no `.env` local e nas envs Production/Preview da Vercel.
+  - Validado direto na API da Resend (envio pra `delivered@resend.dev`, endereço de teste deles) que destinatário externo agora é aceito sem 403.
+  - Deploy em produção feito (`vercel deploy --prod`).
+
 ## 🚧 TODO conhecido (não bloqueante agora)
-- **`EMAIL_FROM` no domínio de teste da Resend precisa virar domínio próprio verificado** — não é só estético, o magic link pode cair no spam até pra você mesmo (ver bug #7). Marcelo já sabe que vai demorar
 - Upload de print removido do formulário a pedido do Marcelo (`printUrl` continua no schema, reativar quando fizer sentido — decidir storage: Vercel Blob, já que filesystem local não funciona no Vercel)
+- E-mail do magic link sai de `login@meutrade.app` (domínio de outro projeto) — se quiser um remetente com a cara do Copy Nômade Trader, precisa verificar um domínio próprio dele na Resend depois
 - Neon free tier hiberna por inatividade — primeira request depois de um tempo parado pode falhar, segunda tentativa sempre funciona. Normal, não é bug.
 
 ## 📋 Próximos passos (retomar amanhã)
 Todos os marcos do roteiro original estão prontos, testados e no ar. Falta alinhar com o Marcelo o que vem depois — candidatos:
-1. Domínio de e-mail próprio verificado na Resend (resolve o bug #7 de vez)
+1. Domínio de e-mail próprio verificado na Resend, com a cara do projeto (hoje usa `meutrade.app` emprestado de outro projeto — funcional, mas não é a marca certa)
 2. Cadastro/gestão de investidores pelo admin (hoje só existe onboarding pelo próprio investidor)
 3. Reativar upload de print (Vercel Blob)
 4. Domínio customizado (não `.vercel.app`)

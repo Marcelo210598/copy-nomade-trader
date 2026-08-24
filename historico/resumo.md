@@ -8,4 +8,6 @@ Stack: Next.js 14 + TS + Prisma 6 + Neon + Tailwind + NextAuth v5 (Resend).
 
 23/08/2026: bateria de testes completa em produção, tudo ✅. Corrigido bug de regra de negócio — trade lançado antes do investidor confirmar a entrada não conta mais no saldo dele (novo campo `entradaConfirmadaEm`, desempate por horário só no dia da confirmação). Domínio de e-mail próprio segue adiado, sem prazo, a pedido do Marcelo.
 
+24/08/2026: saldo/valores passaram a exibir em US$ (antes formatava errado como R$). Corrigido bug crítico: login de investidor (magic link) só funcionava pro Marcelo — `EMAIL_FROM` usava domínio de teste da Resend, que recusa (403) qualquer destinatário que não seja o dono da conta. Trocado pra usar `meutrade.app`, domínio já verificado (de outro projeto), até o Copy Nômade Trader ter o dele próprio. Urgente porque o Luiz (investidor real) começa a vender o copytrade hoje.
+
 Ver `progress.md` na raiz do projeto para o estado atualizado.
