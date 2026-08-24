@@ -41,6 +41,7 @@
 - **BUG CRÍTICO encontrado e corrigido**: login de investidor via magic link só funcionava pro próprio Marcelo. `EMAIL_FROM` usava o domínio de teste da Resend (`onboarding@resend.dev`), que **só entrega pro e-mail dono da conta Resend** — pra qualquer outro destinatário a API da Resend recusa com 403, e isso derrubava a tela de login do investidor com o erro genérico do NextAuth ("Server error / problem with the server configuration"). Achado quando o Luiz (investidor real) tentou logar e caiu nessa tela.
   - Fix: reaproveitado o domínio `meutrade.app`, já verificado na conta Resend (de outro projeto). `EMAIL_FROM` trocado pra `Copy Nomade Trader <login@meutrade.app>` — atualizado no `.env` local e nas envs Production/Preview da Vercel.
   - Validado direto na API da Resend (envio pra `delivered@resend.dev`, endereço de teste deles) que destinatário externo agora é aceito sem 403.
+  - **Validado de ponta a ponta também**: rodado o fluxo real do app em produção (formulário de login → server action → NextAuth → PrismaAdapter → Resend) com `delivered@resend.dev` como e-mail — caiu certinho em "Confira seu e-mail", sem erro. `VerificationToken` de teste gerado foi apagado do banco depois (nenhum `User` chegou a ser criado, só é criado quando o link é clicado).
   - Deploy em produção feito (`vercel deploy --prod`).
 
 ## 🚧 TODO conhecido (não bloqueante agora)
@@ -55,6 +56,7 @@ Todos os marcos do roteiro original estão prontos, testados e no ar. Falta alin
 3. Reativar upload de print (Vercel Blob)
 4. Domínio customizado (não `.vercel.app`)
 5. Mais campos no cadastro do investidor, se fizer sentido depois (telefone/CPF foram cogitados e adiados por decisão do Marcelo)
+6. **Login com Google OAuth como opção adicional** (não substituindo o magic link) — elimina de vez qualquer dependência de e-mail/spam pro login. Marcelo já tem experiência configurando isso (fez no TraderOS). Decidido em 24/08 adiar pra próxima sessão, sem pressa — magic link já tá funcionando e testado
 
 ## 🔧 Configurações importantes
 - `DATABASE_URL` (Neon) — configurada local (`.env`) e em produção (Vercel), mesmo banco pros dois por enquanto
